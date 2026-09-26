@@ -1,0 +1,6 @@
+sentence-transformers
+numpy
+scipy
+pandas
+openai
+requests
