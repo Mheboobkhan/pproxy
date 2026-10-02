@@ -1,7 +1,17 @@
 # pproxy
 
+pproxy is a privacy-aware proxy between a user's request and a cloud LLM. In
+rephrase mode, a local LLM rewrites the request to remove or generalize sensitive
+details while preserving what the user needs help with. Only the rewritten
+request is sent to the cloud model. An optional local synthesis step then adapts
+the cloud's answer using the original request, keeping that original context
+local throughout the rephrase workflow. The project helps evaluate how well this
+approach balances privacy and useful answers; sensitive-detail removal depends
+on the local model's rewrite and is not guaranteed.
+
 Compare original prompts (`baseline`) with prompts rewritten by local Ollama
-(`rephrase`) before sending them to a cloud model.
+(`rephrase`) before sending them to a cloud model. Baseline mode sends the
+original prompt to the cloud for comparison.
 
 ```bash
 python3 -m venv .venv
