@@ -14,7 +14,7 @@ import json
 import threading
 import time
 
-import llm_clients
+from . import llm_clients
 
 _id_lock = threading.Lock()
 _last_id_timestamp = 0

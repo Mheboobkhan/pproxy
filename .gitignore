@@ -13,13 +13,14 @@ htmlcov/
 
 # Generated results and random samples; keep the source dataset
 *.jsonl
-!queries.jsonl
+!/data/queries.jsonl
 *.log
-
-# Development-only test scripts
-test_*.py
 
 # Editor and OS files
 .DS_Store
 .idea/
 .vscode/
+
+# Local experiment artifacts and development tests
+outputs/
+tests/

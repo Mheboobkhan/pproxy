@@ -1,6 +1,6 @@
 # Research TODO
 
-Hypotheses are recorded in [PREREG.md](PREREG.md). The current baseline and
+Hypotheses were originally outlined in PREREG.md and are collected below. The current baseline and
 local abstraction/rephrase modes provide the starting implementation for H1;
 the hypotheses still need evaluation.
 

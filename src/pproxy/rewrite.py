@@ -10,10 +10,10 @@ runs with only `requests` installed and no OPENAI_API_KEY set.
 
 Usage
 -----
-    python rewrite.py                      # all queries -> response.jsonl
-    python rewrite.py --limit 3            # smoke test on the first 3
-    python rewrite.py --out rewrites.jsonl # keep separate from run output
-    python rewrite.py --model mistral      # override the local model
+    python -m src.pproxy.rewrite                      # all queries -> response.jsonl
+    python -m src.pproxy.rewrite --limit 3            # smoke test on the first 3
+    python -m src.pproxy.rewrite --out rewrites.jsonl # keep separate from run output
+    python -m src.pproxy.rewrite --model mistral      # override the local model
 """
 
 import argparse
@@ -21,9 +21,9 @@ import datetime as _dt
 import json
 import sys
 
-import config
-import transform
-from llm_clients import LLMError
+from . import config
+from . import transform
+from .llm_clients import LLMError
 
 # Marks these records as rewrite-only, since by default they land in the same
 # response.jsonl that pproxy.py appends full pipeline runs to. Filter on this
@@ -125,6 +125,8 @@ def main(argv=None):
     print(f"local model: {config.OLLAMA_MODEL} at {config.OLLAMA_HOST}")
 
     failures = 0
+    from pathlib import Path
+    Path(out_path).parent.mkdir(parents=True, exist_ok=True)
     with open(out_path, "a", encoding="utf-8") as out:
         for i, row in enumerate(todo, 1):
             print(f"[{i}/{len(todo)}] {row.get('id')} ... ", end="", flush=True)

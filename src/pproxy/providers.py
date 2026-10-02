@@ -3,8 +3,8 @@
 import os
 from dataclasses import dataclass
 
-import config
-from llm_clients import LLMError
+from . import config
+from .llm_clients import LLMError
 
 
 @dataclass(frozen=True)
@@ -26,9 +26,9 @@ class Remote:
 
     def complete(self, prompt):
         if self.provider == "claude":
-            from claude_client import claude_complete
+            from .claude_client import claude_complete
             return claude_complete(prompt, model=self.model)
-        from llm_clients import openai_complete
+        from .llm_clients import openai_complete
         return openai_complete(prompt, model=self.model, remote=self)
 
 

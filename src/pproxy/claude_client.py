@@ -9,8 +9,8 @@ import time
 
 import anthropic
 
-import config
-from llm_clients import LLMError
+from . import config
+from .llm_clients import LLMError
 
 _client = None
 

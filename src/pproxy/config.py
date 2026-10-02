@@ -8,11 +8,11 @@ import os
 from pathlib import Path
 from urllib.parse import urlparse
 
-ROOT = Path(__file__).resolve().parent
+ROOT = Path(__file__).resolve().parents[2]
 
 # --- data files -----------------------------------------------------------
-QUERIES_PATH = Path(os.getenv("PPROXY_QUERIES", ROOT / "queries.jsonl"))
-RESPONSES_PATH = Path(os.getenv("PPROXY_RESPONSES", ROOT / "response.jsonl"))
+QUERIES_PATH = Path(os.getenv("PPROXY_QUERIES", ROOT / "data" / "queries.jsonl"))
+RESPONSES_PATH = Path(os.getenv("PPROXY_RESPONSES", ROOT / "outputs" / "response.jsonl"))
 
 # --- local rephraser (Ollama) --------------------------------------------
 OLLAMA_HOST = os.getenv("OLLAMA_HOST", "http://localhost:11434")
@@ -44,7 +44,7 @@ CLAUDE_MODEL = os.getenv("CLAUDE_MODEL", "claude-opus-5")
 # Claude Opus 5 thinks by default and thinking tokens count against
 # max_tokens, so the 512 used for the OpenAI arm would truncate answers.
 CLAUDE_MAX_TOKENS = int(os.getenv("CLAUDE_MAX_TOKENS", "16000"))
-PROD_PATH = Path(os.getenv("PPROXY_PROD", ROOT / "prod.jsonl"))
+PROD_PATH = Path(os.getenv("PPROXY_PROD", ROOT / "outputs" / "prod.jsonl"))
 
 # --- sampling -------------------------------------------------------------
 # Temperature 0 on BOTH hops. The pre-registered comparison in PREREG.md is

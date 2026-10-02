@@ -9,9 +9,9 @@ import datetime as _dt
 import json
 import sys
 
-import config
-import transform
-from llm_clients import LLMError
+from . import config
+from . import transform
+from .llm_clients import LLMError
 
 
 def load_queries(path=None):
@@ -72,7 +72,7 @@ def _now():
 
 def run_one(row, mode, *, send=True, remote=None, local_synthesis=False):
     """Transform one query, send it onward, and build the output record."""
-    from providers import resolve
+    from .providers import resolve
     remote = remote or resolve()
     record = {
         "id": row.get("id"),
@@ -129,7 +129,7 @@ def run_all(modes=None, *, limit=None, resume=True, send=True,
             local_synthesis=False):
     """Run every (query, mode) pair and append each result as it completes."""
     modes = tuple(modes or transform.DEFAULT_MODES)
-    from providers import resolve
+    from .providers import resolve
     remote = remote or resolve()
     out_path = out_path or config.RESPONSES_PATH
     rows = load_queries(queries_path)
@@ -144,6 +144,8 @@ def run_all(modes=None, *, limit=None, resume=True, send=True,
         f"{len(done)} already done, {len(planned)} to run")
 
     failures = 0
+    from pathlib import Path
+    Path(out_path).parent.mkdir(parents=True, exist_ok=True)
     with open(out_path, "a", encoding="utf-8") as out:
         for i, (row, mode) in enumerate(planned, 1):
             log(f"[{i}/{len(planned)}] {row.get('id')} {mode} ... ", end="")

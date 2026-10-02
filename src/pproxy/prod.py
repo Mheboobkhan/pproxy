@@ -7,10 +7,10 @@ query, the local rewrite, and Claude's response.
 
 Usage
 -----
-    python prod.py                        # all queries -> prod.jsonl
-    python prod.py --limit 3              # smoke test on the first 3
-    python prod.py --model llama3.1:8b    # override the local model
-    python prod.py --claude-model claude-sonnet-5
+    python -m src.pproxy.prod                        # all queries -> prod.jsonl
+    python -m src.pproxy.prod --limit 3              # smoke test on the first 3
+    python -m src.pproxy.prod --model llama3.1:8b    # override the local model
+    python -m src.pproxy.prod --claude-model claude-sonnet-5
 
 Requires ANTHROPIC_API_KEY and `ollama serve` running locally.
 """
@@ -21,11 +21,11 @@ import json
 import os
 import sys
 
-import config
-import transform
-from claude_client import claude_complete
-from llm_clients import LLMError
-from rewrite import load_queries
+from . import config
+from . import transform
+from .claude_client import claude_complete
+from .llm_clients import LLMError
+from .rewrite import load_queries
 
 MODE = "rephrase"
 
@@ -112,6 +112,8 @@ def main(argv=None):
           f"remote: {config.CLAUDE_MODEL}")
 
     failures = 0
+    from pathlib import Path
+    Path(out_path).parent.mkdir(parents=True, exist_ok=True)
     with open(out_path, "a", encoding="utf-8") as out:
         for i, row in enumerate(todo, 1):
             print(f"[{i}/{len(todo)}] {row.get('id')} ... ", end="", flush=True)

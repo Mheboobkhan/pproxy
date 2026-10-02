@@ -20,13 +20,13 @@ Choose a cloud provider in `pproxy`:
 
 ```bash
 # Requires OPENAI_API_KEY
-python pproxy.py --provider openai --limit 1 --out openai-smoke.jsonl
+python -m src.pproxy --provider openai --limit 1 --out openai-smoke.jsonl
 
 # Requires HF_TOKEN (legacy OPENAI_API_KEY=hf_... also works)
-python pproxy.py --provider huggingface --limit 1 --out hf-smoke.jsonl
+python -m src.pproxy --provider huggingface --limit 1 --out hf-smoke.jsonl
 
 # Requires ANTHROPIC_API_KEY or ANTHROPIC_AUTH_TOKEN
-python pproxy.py --provider claude --limit 1 --out claude-smoke.jsonl
+python -m src.pproxy --provider claude --limit 1 --out claude-smoke.jsonl
 ```
 
 Claude uses the Anthropic Messages API; this option does not invoke the Claude
@@ -55,7 +55,7 @@ the local output alongside rewrites, answers, and request metadata.
 ## Optional local final answer
 
 ```bash
-python pproxy.py --provider huggingface --modes rephrase --limit 5 \
+python -m src.pproxy --provider huggingface --modes rephrase --limit 5 \
   --local-synthesis --out hf-final-answers.jsonl
 ```
 
@@ -80,17 +80,26 @@ record reruns the entire pipeline, including the cloud request.
 
 ## Repository layout
 
-- `pproxy.py`: main CLI for provider selection and experiment modes.
-- `transform.py`: local rewriting, tracking identifiers, and final synthesis.
-- `providers.py`, `llm_clients.py`, `claude_client.py`: cloud and local clients.
-- `runner.py`, `config.py`: batch execution, resume handling, and settings.
-- `rewrite.py`, `prod.py`: standalone rewrite-only and Claude pipelines.
-- `queries.jsonl`: annotated source dataset.
-- `PREREG.md`, `TODO.md`: research hypotheses and outstanding work.
+```text
+src/pproxy/       Runtime package: CLI, configuration, transforms, runner, clients
+data/            Source dataset (queries.jsonl)
+docs/            Research notes and TODO checklist
+tests/           Local development tests (ignored by Git)
+outputs/         Generated responses and samples (ignored by Git)
+pproxy.py         Compatibility launcher for existing commands
+requirements.txt  Runtime dependencies
+```
+
+Run commands from the repository root. `python -m src.pproxy` is the main
+entry point; `python pproxy.py` also works. Standalone pipelines run with
+`python -m src.pproxy.rewrite` and `python -m src.pproxy.prod`.
+The default dataset is `data/queries.jsonl`, and default results go into
+`outputs/`. Custom `--queries` and `--out` paths are relative to your working
+directory. Existing local results and random samples have moved into `outputs/`.
 
 ## TODO
 
-Hypotheses are recorded in [PREREG.md](PREREG.md). The current baseline and
+Research hypotheses are listed in [docs/TODO.md](docs/TODO.md). The current baseline and
 local abstraction/rephrase modes provide the starting implementation for H1;
 the hypotheses still need evaluation.
 
@@ -103,9 +112,3 @@ the hypotheses still need evaluation.
   optional local synthesis step currently handles a single cloud response.
 - [ ] **H4 — K-1 pseudo conversation:** define the conversation construction
   and evaluation procedure, then implement it as a selectable mode.
-
-## Local files
-
-Generated JSONL outputs and random samples, development test scripts, virtual
-environments, Python caches, `.env` files, and editor files are ignored by Git. `queries.jsonl`
-remains tracked as the source dataset.
