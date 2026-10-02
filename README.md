@@ -99,10 +99,6 @@ directory. Existing local results and random samples have moved into `outputs/`.
 
 ## TODO
 
-Research hypotheses are listed in [docs/TODO.md](docs/TODO.md). The current baseline and
-local abstraction/rephrase modes provide the starting implementation for H1;
-the hypotheses still need evaluation.
-
 - [ ] **H1 — Prompt abstraction:** evaluate sensitive-detail removal and answer
   utility for the implemented local rephrase mode against baseline.
 - [ ] **H2 — Approach based on the Shokari paper:** identify the exact paper,
