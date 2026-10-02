@@ -84,26 +84,33 @@ def ollama_generate(prompt, *, model=None, system=None):
 _openai_client = None
 
 
-def _client():
+def _client(remote=None):
+    if remote is not None:
+        remote.validate()
+        from openai import OpenAI
+        return OpenAI(api_key=remote.api_key, base_url=remote.base_url,
+                      timeout=config.REQUEST_TIMEOUT, max_retries=0)
     global _openai_client
     if _openai_client is None:
         if not config.OPENAI_API_KEY:
-            raise LLMError("OPENAI_API_KEY is not set")
+            raise LLMError("Set OPENAI_API_KEY or HF_TOKEN")
         from openai import OpenAI  # imported lazily so baseline-only runs
-        _openai_client = OpenAI(api_key=config.OPENAI_API_KEY)  # need no SDK
+        _openai_client = OpenAI(api_key=config.OPENAI_API_KEY,  # need no SDK
+                                base_url=config.OPENAI_BASE_URL)
     return _openai_client
 
 
-def openai_complete(prompt, *, model=None, system=None):
+def openai_complete(prompt, *, model=None, system=None, remote=None):
     """Send the (possibly transformed) query to the remote model."""
     model = model or config.OPENAI_MODEL
     messages = []
     if system:
         messages.append({"role": "system", "content": system})
     messages.append({"role": "user", "content": prompt})
+    client = _client(remote)
 
     def _call():
-        return _client().chat.completions.create(
+        return client.chat.completions.create(
             model=model,
             messages=messages,
             temperature=config.TEMPERATURE,
@@ -117,7 +124,8 @@ def openai_complete(prompt, *, model=None, system=None):
     text = (resp.choices[0].message.content or "").strip()
     usage = getattr(resp, "usage", None)
     meta = {
-        "provider": "openai",
+        "provider": remote.provider if remote else config.REMOTE_PROVIDER,
+        "base_url": remote.base_url if remote else config.OPENAI_BASE_URL or "https://api.openai.com/v1",
         "model": model,
         "latency_s": round(elapsed, 3),
         "prompt_tokens": getattr(usage, "prompt_tokens", None),

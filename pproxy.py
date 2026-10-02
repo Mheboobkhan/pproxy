@@ -16,7 +16,7 @@ Usage
     python pproxy.py --limit 3 --dry-run      # transform only, no API calls
     python pproxy.py --overwrite              # ignore existing response.jsonl
 
-Requires OPENAI_API_KEY in the environment and `ollama serve` running
+Requires OPENAI_API_KEY or HF_TOKEN in the environment and `ollama serve` running
 locally for the rephrase mode.
 """
 
@@ -27,6 +27,8 @@ import config
 import transform
 from runner import run_all
 from transform import transformer  # re-exported: original entry point
+from providers import resolve
+from llm_clients import LLMError
 
 __all__ = ["transformer", "main"]
 
@@ -42,6 +44,11 @@ def build_parser():
         help="modes to run (default: baseline rephrase)",
     )
     p.add_argument("--queries", default=None, help="path to queries.jsonl")
+    p.add_argument("--provider", choices=("openai", "huggingface", "claude"),
+                   help="cloud provider (default: PPROXY_PROVIDER or detected from credentials)")
+    p.add_argument("--model", help="cloud model override for the selected provider")
+    p.add_argument("--local-synthesis", action="store_true",
+                   help="use Ollama to adapt rephrase cloud answers to the original query")
     p.add_argument("--out", default=None, help="path to response.jsonl")
     p.add_argument("--limit", type=int, default=None,
                    help="only run the first N queries (smoke test)")
@@ -55,10 +62,15 @@ def build_parser():
 def main(argv=None):
     args = build_parser().parse_args(argv)
 
-    if not args.dry_run and not config.OPENAI_API_KEY:
-        print("OPENAI_API_KEY is not set; export it or pass --dry-run",
-              file=sys.stderr)
+    try:
+        remote = resolve(args.provider, args.model)
+        if not args.dry_run:
+            remote.validate()
+    except (LLMError, ValueError) as exc:
+        print(str(exc), file=sys.stderr)
         return 2
+
+    print(f"Cloud provider: {remote.provider}; model: {remote.model}")
 
     failures = run_all(
         modes=args.modes,
@@ -67,6 +79,8 @@ def main(argv=None):
         send=not args.dry_run,
         queries_path=args.queries,
         out_path=args.out,
+        remote=remote,
+        local_synthesis=args.local_synthesis,
     )
     return 1 if failures else 0
 

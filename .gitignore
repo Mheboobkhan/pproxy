@@ -1,0 +1,25 @@
+.venv/
+venv/
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.coverage
+htmlcov/
+
+# Credentials and local configuration
+.env
+.env.*
+!.env.example
+
+# Generated results and random samples; keep the source dataset
+*.jsonl
+!queries.jsonl
+*.log
+
+# Development-only test scripts
+test_*.py
+
+# Editor and OS files
+.DS_Store
+.idea/
+.vscode/

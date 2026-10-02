@@ -75,6 +75,7 @@ def rewrite_one(row):
     record = {
         "id": row.get("id"),
         "stage": STAGE,
+        "query_id": None,
         "intent_label": row.get("intent_label"),
         "query": row.get("query"),            # original, unchanged
         "rewritten_query": None,              # what the local model produced
@@ -89,6 +90,7 @@ def rewrite_one(row):
         text, meta = transform.rephrase(row["query"])
         record["rewritten_query"] = text
         record["rewriter_meta"] = meta.get("rephraser")
+        record["query_id"] = meta.get("query_id")
     except (LLMError, KeyError) as exc:
         record["error"] = f"{type(exc).__name__}: {exc}"
     return record
